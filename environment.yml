@@ -4,4 +4,4 @@ dependencies:
   - python=3.8
   - pip=22.3.1
   - pip:
-    - deepface
+    - deepface=0.0.78
