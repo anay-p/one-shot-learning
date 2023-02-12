@@ -1,0 +1,7 @@
+name: deepface
+
+dependencies:
+  - python=3.8
+  - pip=22.3.1
+  - pip:
+    - deepface
