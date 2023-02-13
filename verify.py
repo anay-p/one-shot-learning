@@ -56,7 +56,8 @@ while True:
         elif no_of_faces == 1:
             face = cv2.imread(f"data/{roll_no}.jpg")
             result = DeepFace.verify(face, frame_flip_copy, "Facenet512", "ssd", "euclidean_l2")
-            print(f"{result['distance']} (threshold: {result['threshold']})")
+            print(f"Distance: {result['distance']} (threshold: {result['threshold']})")
+            print(f"Time taken: {result['time']}s")
             if result["verified"]:
                 print("Verified!")
             else:
