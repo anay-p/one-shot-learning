@@ -78,6 +78,7 @@ else:
                 # Model is chosen as a modified FaceNet which returns 512 dimensional vector rather
                 # than the usual 128 dimensional vector
                 # The face detector chosen is SSD, the same as the one used in this file.
+                # TODO: Use DeepFace.find() instead of DeepFace.verify()
                 face = cv2.imread(f"data/{roll_no}.jpg")
                 result = DeepFace.verify(face, frame_copy, "Facenet512", "ssd", "euclidean_l2")
 
