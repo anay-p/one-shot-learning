@@ -2,11 +2,15 @@ import gdown
 import os
 
 def get_weights(path, url):
+    """Downloads the file at the path from the url it if does not already exist"""
     if not os.path.isfile(path):
         gdown.download(url, path)
 
+# Define absolute path to ~/.deepface/weights and create it if it does not already exist
 weights_dir = os.path.join(os.path.expanduser("~"), ".deepface/weights")
 os.makedirs(weights_dir, exist_ok=True)
+
+# Download the weights for FaceNet512 and SDD if they aren't already present
 get_weights(
     os.path.join(weights_dir, "facenet512_weights.h5"),
     "https://github.com/serengil/deepface_models/releases/download/v1.0/facenet512_weights.h5"
