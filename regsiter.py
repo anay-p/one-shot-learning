@@ -21,17 +21,17 @@ net = cv2.dnn.readNetFromCaffe(
 while True:
     # Read a frame from the webcam, flip it and make a copy of it
     _, frame = capture.read()
-    frame_flip = cv2.flip(frame, 1)
-    frame_flip_copy = np.copy(frame_flip)
+    frame = cv2.flip(frame, 1)
+    frame_copy = np.copy(frame)
 
     # Initialize a variable to store the no of faces detected in the frame
     no_of_faces = 0
 
     # Store the height and width of the frame
-    h, w = frame_flip.shape[:2]
+    h, w = frame.shape[:2]
 
     # Create a blob from the frame and pass it to the face detector model
-    blob = cv2.dnn.blobFromImage(frame_flip, 1.0, (300, 300), (104.0, 177.0, 123.0))
+    blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (104.0, 177.0, 123.0))
     net.setInput(blob)
     detections = net.forward()
 
@@ -52,8 +52,8 @@ while True:
         # Create an outline around the detected face and display the confidence percentage on the frame
         text = f"{confidence * 100:.2f}%"
         y = start_y - 10 if start_y - 10 > 10 else start_y + 10
-        cv2.rectangle(frame_flip, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)
-        cv2.putText(frame_flip, text, (start_x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.rectangle(frame, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)
+        cv2.putText(frame, text, (start_x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
 
     # Get keypress input
     key = cv2.waitKey(1) & 0xFF
@@ -70,14 +70,14 @@ while True:
         elif no_of_faces == 1:
             if not os.path.exists("data"):
                 os.makedirs("data")
-            cv2.imwrite(f"data/{roll_no}.jpg", frame_flip_copy)
+            cv2.imwrite(f"data/{roll_no}.jpg", frame_copy)
             print("Face registered successfully!")
             break
         else:
             print("More than one face detected!")
 
     # Display the frame on the window
-    cv2.imshow("Register", frame_flip)
+    cv2.imshow("Register", frame)
 
 # Turn the webcam off and destroy the window
 capture.release()
