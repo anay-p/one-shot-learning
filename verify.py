@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import os
 from deepface import DeepFace
-from deepface.detectors import FaceDetector
 
 # Take roll no from user
 roll_no = input("Please enter your roll no: ")
