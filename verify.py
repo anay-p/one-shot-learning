@@ -19,7 +19,7 @@ else:
     thresh = 0.8
 
     # Test image is passed to load and initialize the models
-    DeepFace.represent("data/test.jpg", "Facenet512", detector_backend="ssd")
+    DeepFace.represent("test/test.jpg", "Facenet512", detector_backend="ssd")
 
     # Start capturing the webcam, set its width and height, and create a window for displaying its output
     capture = cv2.VideoCapture(0)
