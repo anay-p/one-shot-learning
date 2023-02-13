@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 from deepface import DeepFace
+from deepface.detectors import FaceDetector
 
 # Take roll no from user
 roll_no = input("Please enter your roll no: ")
@@ -24,6 +25,9 @@ else:
         os.path.join(os.path.expanduser("~"), ".deepface/weights/res10_300x300_ssd_iter_140000.caffemodel")
     )
     thresh = 0.8
+
+    # Test image is passed to load and initialize the models
+    DeepFace.represent("data/test.jpg", "Facenet512", detector_backend="ssd")
 
     while True:
         # Read a frame from the webcam, flip it and make a copy of it

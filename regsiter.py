@@ -2,9 +2,8 @@ import cv2
 import numpy as np
 import os
 
-# Take roll no from user and create data folder if not present
+# Take roll no from user
 roll_no = input("Please enter your roll no: ")
-os.makedirs("data", exist_ok=True)
 
 # Start capturing the webcam, set its width and height, and create a window for displaying its output
 capture = cv2.VideoCapture(0)
