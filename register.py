@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 import os
 
-# Take roll no from user
+# Take roll no from user and create data folder if not present
 roll_no = input("Please enter your roll no: ")
+os.makedirs("data", exist_ok=True)
 
 # Load SSD model for face detection and set threshold
 net = cv2.dnn.readNetFromCaffe(
