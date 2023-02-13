@@ -11,14 +11,6 @@ roll_no = input("Please enter your roll no: ")
 if not os.path.isfile(f"data/{roll_no}.jpg"):
     print("This roll no is not registered.")
 else:
-    # Start capturing the webcam, set its width and height, and create a window for displaying its output
-    capture = cv2.VideoCapture(0)
-    frame_width = 1280
-    frame_height = 720
-    capture.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
-    capture.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
-    cv2.namedWindow("Verify", cv2.WINDOW_AUTOSIZE)
-
     # Load SSD model for face detection and set threshold
     net = cv2.dnn.readNetFromCaffe(
         os.path.join(os.path.expanduser("~"), ".deepface/weights/deploy.prototxt"),
@@ -28,6 +20,14 @@ else:
 
     # Test image is passed to load and initialize the models
     DeepFace.represent("data/test.jpg", "Facenet512", detector_backend="ssd")
+
+    # Start capturing the webcam, set its width and height, and create a window for displaying its output
+    capture = cv2.VideoCapture(0)
+    frame_width = 1280
+    frame_height = 720
+    capture.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
+    capture.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
+    cv2.namedWindow("Verify", cv2.WINDOW_AUTOSIZE)
 
     while True:
         # Read a frame from the webcam, flip it and make a copy of it

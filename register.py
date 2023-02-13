@@ -5,6 +5,13 @@ import os
 # Take roll no from user
 roll_no = input("Please enter your roll no: ")
 
+# Load SSD model for face detection and set threshold
+net = cv2.dnn.readNetFromCaffe(
+    os.path.join(os.path.expanduser("~"), ".deepface/weights/deploy.prototxt"),
+    os.path.join(os.path.expanduser("~"), ".deepface/weights/res10_300x300_ssd_iter_140000.caffemodel")
+)
+thresh = 0.8
+
 # Start capturing the webcam, set its width and height, and create a window for displaying its output
 capture = cv2.VideoCapture(0)
 frame_width = 1280
@@ -12,13 +19,6 @@ frame_height = 720
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
 cv2.namedWindow("Register", cv2.WINDOW_AUTOSIZE)
-
-# Load SSD model for face detection and set threshold
-net = cv2.dnn.readNetFromCaffe(
-    os.path.join(os.path.expanduser("~"), ".deepface/weights/deploy.prototxt"),
-    os.path.join(os.path.expanduser("~"), ".deepface/weights/res10_300x300_ssd_iter_140000.caffemodel")
-)
-thresh = 0.8
 
 while True:
     # Read a frame from the webcam, flip it and make a copy of it
