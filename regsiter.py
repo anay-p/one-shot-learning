@@ -2,21 +2,24 @@ import cv2
 import numpy as np
 import os
 
-# Take roll no from user
+# Take roll no from user and create data folder if not present
 roll_no = input("Please enter your roll no: ")
+os.makedirs("data", exist_ok=True)
 
-# Define confidence limit for face detector
-confidence_limit = 0.8
-
-# Start capturing the webcam and create a window for displaying its output
+# Start capturing the webcam, set its width and height, and create a window for displaying its output
 capture = cv2.VideoCapture(0)
+frame_width = 1280
+frame_height = 720
+capture.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
+capture.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
 cv2.namedWindow("Register", cv2.WINDOW_AUTOSIZE)
 
-# Load SSD model for face detection
+# Load SSD model for face detection and set threshold
 net = cv2.dnn.readNetFromCaffe(
     os.path.join(os.path.expanduser("~"), ".deepface/weights/deploy.prototxt"),
     os.path.join(os.path.expanduser("~"), ".deepface/weights/res10_300x300_ssd_iter_140000.caffemodel")
 )
+thresh = 0.8
 
 while True:
     # Read a frame from the webcam, flip it and make a copy of it
@@ -27,9 +30,6 @@ while True:
     # Initialize a variable to store the no of faces detected in the frame
     no_of_faces = 0
 
-    # Store the height and width of the frame
-    h, w = frame.shape[:2]
-
     # Create a blob from the frame and pass it to the face detector model
     blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (104.0, 177.0, 123.0))
     net.setInput(blob)
@@ -37,16 +37,16 @@ while True:
 
     # Loop through all the detections
     for i in range(detections.shape[2]):
-        # Store the confidence level and ignore detection if the it is lower than the confidence limit
+        # Retrieve the confidence level and ignore detection if the it is lower than the threshold
         confidence = detections[0, 0, i, 2]
-        if confidence < confidence_limit:
+        if confidence < thresh:
             continue
 
         # Increment the no of faces by one
         no_of_faces += 1
 
         # Get the coordinates for the detected face
-        box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+        box = detections[0, 0, i, 3:7] * np.array([frame_width, frame_height, frame_width, frame_height])
         start_x, start_y, end_x, end_y = box.astype("int")
 
         # Create an outline around the detected face and display the confidence percentage on the frame
@@ -68,8 +68,6 @@ while True:
         if no_of_faces == 0:
             print("No face detected!")
         elif no_of_faces == 1:
-            if not os.path.exists("data"):
-                os.makedirs("data")
             cv2.imwrite(f"data/{roll_no}.jpg", frame_copy)
             print("Face registered successfully!")
             break
