@@ -2,6 +2,6 @@ name: deepface
 
 dependencies:
   - python=3.8
-  - pip=22.3.1
+  - pip
   - pip:
-    - deepface=0.0.78
+    - -r file:requirements.txt
