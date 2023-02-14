@@ -1,4 +1,4 @@
-name: deepface2
+name: deepface
 
 dependencies:
   - python=3.8
