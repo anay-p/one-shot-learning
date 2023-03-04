@@ -21,7 +21,7 @@ except FileNotFoundError:
     print("No users registered")
     sys.exit()
 
-DeepFace.represent("test/test.jpg", fr_model, detector_backend=fd_model)
+DeepFace.represent("test.jpg", fr_model, detector_backend=fd_model)
 
 capture = cv2.VideoCapture(0)
 frame_width = 1280
