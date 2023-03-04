@@ -3,6 +3,7 @@ from deepface import DeepFace
 from deepface.commons import functions, distance
 import pickle
 from datetime import datetime
+import sys
 
 fd_model = "ssd"
 fr_model = "Facenet512"
@@ -13,8 +14,12 @@ fr_thresh = 0.9
 def euclidean_l2(repr1, repr2):
     return distance.findEuclideanDistance(distance.l2_normalize(repr1), distance.l2_normalize(repr2))
 
-with open("representations.pkl", "rb") as f:
-    representations = pickle.load(f)
+try:
+    with open("representations.pkl", "rb") as f:
+        representations = pickle.load(f)
+except FileNotFoundError:
+    print("No users registered")
+    sys.exit()
 
 DeepFace.represent("test/test.jpg", fr_model, detector_backend=fd_model)
 
