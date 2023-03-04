@@ -1,82 +1,82 @@
 import cv2
-import numpy as np
-import os
+from deepface import DeepFace
+from deepface.commons import functions
+import pickle
 
-# Take roll no from user and create data folder if not present
-roll_no = input("Please enter your roll no: ")
-os.makedirs("data", exist_ok=True)
+fd_model = "ssd"
+fr_model = "Facenet512"
 
-# Load SSD model for face detection and set threshold
-net = cv2.dnn.readNetFromCaffe(
-    os.path.join(os.path.expanduser("~"), ".deepface/weights/deploy.prototxt"),
-    os.path.join(os.path.expanduser("~"), ".deepface/weights/res10_300x300_ssd_iter_140000.caffemodel")
-)
-thresh = 0.8
+def yesno(prompt, default=None):
+    yes_list = ["y", "Y"]
+    no_list = ["n", "N"]
+    if default == "y":
+        prompt += " [Y/n] "
+        yes_list.append("")
+    elif default == "n":
+        prompt += " [y/N] "
+        no_list.append("")
+    else:
+        prompt += " [y/n] "
+    while True:
+        ans = input(prompt)
+        if ans in yes_list:
+            ans = True
+            break
+        elif ans in no_list:
+            ans = False
+            break
+        else:
+            print("Please give a valid answer ('y' for yes or 'n' for no)")
+    return ans
 
-# Start capturing the webcam, set its width and height, and create a window for displaying its output
+cv2.namedWindow("Register", cv2.WINDOW_AUTOSIZE)
 capture = cv2.VideoCapture(0)
 frame_width = 1280
 frame_height = 720
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
-cv2.namedWindow("Register", cv2.WINDOW_AUTOSIZE)
+
+representations = {}
 
 while True:
-    # Read a frame from the webcam, flip it and make a copy of it
-    _, frame = capture.read()
-    frame = cv2.flip(frame, 1)
-    frame_copy = np.copy(frame)
+    roll_no = input("Please enter your roll no: ")
+    name = input("Please enter your name: ")
 
-    # Initialize a variable to store the no of faces detected in the frame
-    no_of_faces = 0
+    while True:
+        _, frame = capture.read()
+        frame = cv2.flip(frame, 1)
 
-    # Create a blob from the frame and pass it to the face detector model
-    blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (104.0, 177.0, 123.0))
-    net.setInput(blob)
-    detections = net.forward()
+        try:
+            extracted_faces = functions.extract_faces(frame, target_size=functions.find_target_size(fr_model), detector_backend=fd_model)
+        except ValueError:
+            extracted_faces = []
 
-    # Loop through all the detections
-    for i in range(detections.shape[2]):
-        # Retrieve the confidence level and ignore detection if the it is lower than the threshold
-        confidence = detections[0, 0, i, 2]
-        if confidence < thresh:
-            continue
+        for face, coordinates, _ in extracted_faces:
+            x, y, w, h = coordinates.values()
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-        # Increment the no of faces by one
-        no_of_faces += 1
-
-        # Get the coordinates for the detected face
-        box = detections[0, 0, i, 3:7] * np.array([frame_width, frame_height, frame_width, frame_height])
-        start_x, start_y, end_x, end_y = box.astype("int")
-
-        # Create an outline around the detected face and display the confidence percentage on the frame
-        text = f"{confidence * 100:.2f}%"
-        y = start_y - 10 if start_y - 10 > 10 else start_y + 10
-        cv2.rectangle(frame, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)
-        cv2.putText(frame, text, (start_x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
-
-    # Get keypress input
-    key = cv2.waitKey(1) & 0xFF
-
-    if key == ord('q'):
-        # Exit loop if 'q' is pressed
-        print("User not registered.")
-        break
-    elif key == ord(' '):
-        # If the spacebar key is pressed and only one face is detected, save the copied frame as a JPEG with
-        # roll no as the name and exit loop otherwise continue
-        if no_of_faces == 0:
-            print("No face detected!")
-        elif no_of_faces == 1:
-            cv2.imwrite(f"data/{roll_no}.jpg", frame_copy)
-            print("Face registered successfully!")
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            print("User not registered")
             break
-        else:
-            print("More than one face detected!")
+        elif key == ord(' '):
+            if len(extracted_faces) == 1:
+                if yesno("Would you like to continue with this image?", "n"):
+                    embedding = DeepFace.represent(face, fr_model, detector_backend="skip")[0]["embedding"]
+                    # TODO: Add query that inserts data into registered users table
+                    print(name, roll_no)
+                    representations[roll_no] = embedding
+                    print("Registered")
+                    break
 
-    # Display the frame on the window
-    cv2.imshow("Register", frame)
+        cv2.imshow("Register", frame)
 
-# Turn the webcam off and destroy the window
+    if not yesno("Would you like to register another user?", "y"):
+        break
+
 capture.release()
 cv2.destroyWindow("Register")
+
+if len(representations) != 0:
+    with open(f"representations.pkl", "wb") as f:
+        pickle.dump(representations, f)
