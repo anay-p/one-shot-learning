@@ -29,18 +29,18 @@ def yesno(prompt, default=None):
             print("Please give a valid answer ('y' for yes or 'n' for no)")
     return ans
 
-cv2.namedWindow("Register", cv2.WINDOW_AUTOSIZE)
-capture = cv2.VideoCapture(0)
-frame_width = 1280
-frame_height = 720
-capture.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
-capture.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
-
 representations = {}
 
 while True:
     roll_no = input("Please enter your roll no: ")
     name = input("Please enter your name: ")
+
+    capture = cv2.VideoCapture(0)
+    frame_width = 1280
+    frame_height = 720
+    capture.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
+    capture.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
+    cv2.namedWindow("Register", cv2.WINDOW_AUTOSIZE)
 
     while True:
         _, frame = capture.read()
@@ -55,6 +55,8 @@ while True:
             x, y, w, h = coordinates.values()
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
+        cv2.imshow("Register", frame)
+
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             print("User not registered")
@@ -63,19 +65,16 @@ while True:
             if len(extracted_faces) == 1:
                 if yesno("Would you like to continue with this image?", "n"):
                     embedding = DeepFace.represent(face, fr_model, detector_backend="skip")[0]["embedding"]
-                    # TODO: Add query that inserts data into registered users table
                     print(name, roll_no)
                     representations[roll_no] = embedding
-                    print("Registered")
+                    print("User registered")
                     break
 
-        cv2.imshow("Register", frame)
+    capture.release()
+    cv2.destroyWindow("Register")
 
     if not yesno("Would you like to register another user?", "y"):
         break
-
-capture.release()
-cv2.destroyWindow("Register")
 
 if len(representations) != 0:
     with open(f"representations.pkl", "wb") as f:
