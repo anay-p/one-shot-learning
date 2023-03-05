@@ -46,7 +46,7 @@ while True:
     for face, coordinates, _ in extracted_faces:
         embedding = DeepFace.represent(face, fr_model, detector_backend="skip")[0]["embedding"]
         distances = {roll_no: euclidean_l2(embedding, repr) for roll_no, repr in representations.items()}
-        match = max(distances, key=lambda roll_no: distances[roll_no])
+        match = min(distances, key=lambda roll_no: distances[roll_no])
         x, y, w, h = coordinates.values()
         # text = f"{distances[match]:.3f}/{fr_thresh}"
         if distances[match] < fr_thresh:

@@ -48,7 +48,7 @@ while True:
 
         try:
             extracted_faces = functions.extract_faces(frame, target_size=functions.find_target_size(fr_model), detector_backend=fd_model)
-        except ValueError:
+        except (cv2.error, ValueError):
             extracted_faces = []
 
         for face, coordinates, _ in extracted_faces:
