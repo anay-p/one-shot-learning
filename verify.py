@@ -4,6 +4,7 @@ from deepface.commons import functions, distance
 import pickle
 from datetime import datetime
 import sys
+import pymysql
 
 fd_model = "ssd"
 fr_model = "Facenet512"
@@ -22,6 +23,15 @@ except FileNotFoundError:
     sys.exit()
 
 DeepFace.represent("test.jpg", fr_model, detector_backend=fd_model)
+
+connection = pymysql.connect(
+    host="localhost",
+    user="root",
+    password="1234",
+    database="Cyborg",
+    autocommit=True
+)
+cursor = connection.cursor()
 
 capture = cv2.VideoCapture(0)
 frame_width = 1280
@@ -71,14 +81,17 @@ while True:
     elif key == ord('o'):
         if len(recognized_faces) != 0:
             print("ROOM UNLOCK AUTHORIZED")
-            print(datetime.now(), *recognized_faces)
+            cursor.execute(f"INSERT INTO `entries` (`Time`, `Roll No`, `Action`) VALUES (\"{datetime.now()}\", \"{recognized_faces[0]}\", \"UNLOCK\")")
             room_locked = False
         else:
             print("CANNOT UNLOCK: NOT AUTHORIZED")
     elif key == ord('c'):
         if len(recognized_faces) != 0:
             print("ROOM LOCK AUTHORIZED")
-            print(datetime.now(), *recognized_faces)
+            cursor.execute(f"INSERT INTO `entries` (`Time`, `Roll No`, `Action`) VALUES (\"{datetime.now()}\", \"{recognized_faces[0]}\", \"LOCK\")")
             room_locked = True
         else:
             print("CANNOT LOCK: NOT AUTHORIZED")
+
+cursor.close()
+connection.close()

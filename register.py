@@ -2,6 +2,7 @@ import cv2
 from deepface import DeepFace
 from deepface.commons import functions
 import pickle
+import pymysql
 
 fd_model = "ssd"
 fr_model = "Facenet512"
@@ -30,6 +31,16 @@ def yesno(prompt, default=None):
     return ans
 
 representations = {}
+
+DeepFace.represent("test.jpg", fr_model, detector_backend=fd_model)
+
+connection = pymysql.connect(
+    host="localhost",
+    user="root",
+    password="1234",
+    database="Cyborg"
+)
+cursor = connection.cursor()
 
 while True:
     roll_no = input("Please enter your roll no: ")
@@ -65,8 +76,8 @@ while True:
             if len(extracted_faces) == 1:
                 if yesno("Would you like to continue with this image?", "n"):
                     embedding = DeepFace.represent(face, fr_model, detector_backend="skip")[0]["embedding"]
-                    print(name, roll_no)
                     representations[roll_no] = embedding
+                    cursor.execute(f"INSERT INTO `members` (`Roll No`, `Name`) VALUES (\"{roll_no}\", \"{name}\")")
                     print("User registered")
                     break
 
@@ -79,3 +90,7 @@ while True:
 if len(representations) != 0:
     with open(f"representations.pkl", "wb") as f:
         pickle.dump(representations, f)
+
+connection.commit()
+cursor.close()
+connection.close()
