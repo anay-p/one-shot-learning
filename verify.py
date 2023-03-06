@@ -5,12 +5,7 @@ import pickle
 from datetime import datetime
 import sys
 import pymysql
-
-fd_model = "ssd"
-fr_model = "Facenet512"
-dst_metric = "euclidean_l2"
-# fr_thresh = distance.findThreshold(fr_model, dst_metric)
-fr_thresh = 0.9
+from constants import *
 
 def euclidean_l2(repr1, repr2):
     return distance.findEuclideanDistance(distance.l2_normalize(repr1), distance.l2_normalize(repr2))
@@ -22,13 +17,13 @@ except FileNotFoundError:
     print("No users registered")
     sys.exit()
 
-DeepFace.represent("test.jpg", fr_model, detector_backend=fd_model)
+DeepFace.represent("test.jpg", FR_MODEL_NAME, detector_backend=FD_MODEL_NAME)
 
 connection = pymysql.connect(
     host="localhost",
-    user="root",
-    password="1234",
-    database="Cyborg",
+    user=DB_USERNAME,
+    password=DB_PASSWORD,
+    database="cyborg",
     autocommit=True
 )
 cursor = connection.cursor()
@@ -48,19 +43,19 @@ while True:
     frame = cv2.flip(frame, 1)
 
     try:
-        extracted_faces = functions.extract_faces(frame, target_size=functions.find_target_size(fr_model), detector_backend=fd_model)
+        extracted_faces = functions.extract_faces(frame, target_size=functions.find_target_size(FR_MODEL_NAME), detector_backend=FD_MODEL_NAME)
     except (ValueError, cv2.error):
         extracted_faces = []
 
     recognized_faces = []
 
     for face, coordinates, _ in extracted_faces:
-        embedding = DeepFace.represent(face, fr_model, detector_backend="skip")[0]["embedding"]
+        embedding = DeepFace.represent(face, FR_MODEL_NAME, detector_backend="skip")[0]["embedding"]
         distances = {roll_no: euclidean_l2(embedding, repr) for roll_no, repr in representations.items()}
         match = min(distances, key=lambda roll_no: distances[roll_no])
         x, y, w, h = coordinates.values()
-        # text = f"{distances[match]:.3f}/{fr_thresh}"
-        if distances[match] < fr_thresh:
+        # text = f"{distances[match]:.3f}/{FR_MODEL_THRESH}"
+        if distances[match] < FR_MODEL_THRESH:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.putText(frame, match, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
             # cv2.putText(frame, text, (x, y-35), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)

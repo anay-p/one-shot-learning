@@ -3,9 +3,7 @@ from deepface import DeepFace
 from deepface.commons import functions
 import pickle
 import pymysql
-
-fd_model = "ssd"
-fr_model = "Facenet512"
+from constants import *
 
 def yesno(prompt, default=None):
     yes_list = ["y", "Y"]
@@ -32,13 +30,13 @@ def yesno(prompt, default=None):
 
 representations = {}
 
-DeepFace.represent("test.jpg", fr_model, detector_backend=fd_model)
+DeepFace.represent("test.jpg", FR_MODEL_NAME, detector_backend=FD_MODEL_NAME)
 
 connection = pymysql.connect(
     host="localhost",
-    user="root",
-    password="1234",
-    database="Cyborg"
+    user=DB_USERNAME,
+    password=DB_PASSWORD,
+    database="cyborg"
 )
 cursor = connection.cursor()
 
@@ -58,7 +56,7 @@ while True:
         frame = cv2.flip(frame, 1)
 
         try:
-            extracted_faces = functions.extract_faces(frame, target_size=functions.find_target_size(fr_model), detector_backend=fd_model)
+            extracted_faces = functions.extract_faces(frame, target_size=functions.find_target_size(FR_MODEL_NAME), detector_backend=FD_MODEL_NAME)
         except (cv2.error, ValueError):
             extracted_faces = []
 
@@ -75,7 +73,7 @@ while True:
         elif key == ord(' '):
             if len(extracted_faces) == 1:
                 if yesno("Would you like to continue with this image?", "n"):
-                    embedding = DeepFace.represent(face, fr_model, detector_backend="skip")[0]["embedding"]
+                    embedding = DeepFace.represent(face, FR_MODEL_NAME, detector_backend="skip")[0]["embedding"]
                     representations[roll_no] = embedding
                     cursor.execute(f"INSERT INTO `members` (`Roll No`, `Name`) VALUES (\"{roll_no}\", \"{name}\")")
                     print("User registered")
