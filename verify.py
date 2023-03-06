@@ -40,7 +40,8 @@ capture.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
 cv2.namedWindow("Verify", cv2.WINDOW_AUTOSIZE)
 
-room_locked = True
+cursor.execute("SELECT * FROM `entries` ORDER BY `Time` DESC LIMIT 1")
+room_locked = True if cursor.fetchone()[2] == "LOCK" else False
 
 while True:
     _, frame = capture.read()
