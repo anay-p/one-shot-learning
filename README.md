@@ -1,6 +1,6 @@
 ### Steps to try it out:
-1. Clone this repo
-2. Create a conda environment using the environment.yml file and activate it
+1. Clone this repository.
+2. Create a conda environment using the environment.yml file and activate it.
 3. Create the required database and tables using the following MySQL queries. Also modify the username and password fields in constants.py as needed.
 ```MySQL
 CREATE DATABASE `cyborg`;
