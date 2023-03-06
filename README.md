@@ -15,5 +15,7 @@ CREATE TABLE `cyborg`.`entries` (
   `Action` ENUM("UNLOCK", "LOCK") NOT NULL,
   PRIMARY KEY (`Time`));
 ```
-4. Run register.py to register new users. Weights for models will be downloaded if running for the first time.
-5. Run main.py.
+4. Run register.py to register new users. Weights for models will be downloaded if running for the first time. When the 'Register' window in is focus, pressing the spacebar key with only one face being detected will register that face. Pressing 'q' will cancel registration of that user.
+5. Run main.py. With the "Main" window in focus, pressing 'o' will unlock (open) the room while pressing 'c' will lock (close) the room. Pressing 'q' will quit the program.
+
+Note: The models used can be changed in the constants.py file along with the threshold for the face recognition model.
