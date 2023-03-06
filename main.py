@@ -33,7 +33,7 @@ frame_width = 1280
 frame_height = 720
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
-cv2.namedWindow("Verify", cv2.WINDOW_AUTOSIZE)
+cv2.namedWindow("Main", cv2.WINDOW_AUTOSIZE)
 
 cursor.execute("SELECT * FROM `entries` ORDER BY `Time` DESC LIMIT 1")
 room_locked = True if cursor.fetchone()[2] == "LOCK" else False
@@ -69,7 +69,7 @@ while True:
     else:
         cv2.putText(frame, "ROOM UNLOCKED", (frame_width-275, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_AA)
 
-    cv2.imshow("Verify", frame)
+    cv2.imshow("Main", frame)
 
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
