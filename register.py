@@ -1,3 +1,4 @@
+import os
 import cv2
 from deepface import DeepFace
 from deepface.commons import functions
@@ -38,7 +39,8 @@ connection = pymysql.connect(
 )
 cursor = connection.cursor()
 
-if yesno("Would you like to add new users or re-register everyone?", "y"):
+add_new = yesno("Would you like to continue and add new users or start from scratch?", "y")
+if add_new:
     with open("representations.pkl", "rb") as f:
         representations = pickle.load(f)
 else:
@@ -95,6 +97,9 @@ while True:
         break
 
 if yesno("Do you want to commit all changes?", "n"):
+    if not add_new:
+        for image in os.listdir("images"):
+            os.remove(f"images\\{image}")
     for roll_no, face in registered_faces.items():
         cv2.imwrite(f"images\\{roll_no}.jpg", face)
     with open("representations.pkl", "wb") as f:
