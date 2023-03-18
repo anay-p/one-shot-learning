@@ -28,8 +28,6 @@ def yesno(prompt, default=None):
             print("Please give a valid answer ('y' for yes or 'n' for no)")
     return ans
 
-representations = {}
-
 DeepFace.represent("test.jpg", FR_MODEL_NAME, detector_backend=FD_MODEL_NAME)
 
 connection = pymysql.connect(
@@ -39,6 +37,15 @@ connection = pymysql.connect(
     database="cyborg"
 )
 cursor = connection.cursor()
+
+if yesno("Would you like to add new users or re-register everyone?", "y"):
+    with open("representations.pkl", "rb") as f:
+        representations = pickle.load(f)
+else:
+    representations = {}
+    cursor.execute("TRUNCATE TABLE `members`")
+
+registered_faces = {}
 
 while True:
     roll_no = input("Please enter your roll no: ")
@@ -54,6 +61,7 @@ while True:
     while True:
         _, frame = capture.read()
         frame = cv2.flip(frame, 1)
+        frame_copy = frame.copy()
 
         try:
             extracted_faces = functions.extract_faces(frame, target_size=functions.find_target_size(FR_MODEL_NAME), detector_backend=FD_MODEL_NAME)
@@ -73,6 +81,7 @@ while True:
         elif key == ord(' '):
             if len(extracted_faces) == 1:
                 if yesno("Would you like to continue with this image?", "n"):
+                    registered_faces[roll_no] = frame_copy[y:y+h+1, x:x+w+1]
                     embedding = DeepFace.represent(face, FR_MODEL_NAME, detector_backend="skip")[0]["embedding"]
                     representations[roll_no] = embedding
                     cursor.execute(f"INSERT INTO `members` (`Roll No`, `Name`) VALUES (\"{roll_no}\", \"{name}\")")
@@ -85,10 +94,12 @@ while True:
     if not yesno("Would you like to register another user?", "y"):
         break
 
-if len(representations) != 0:
-    with open(f"representations.pkl", "wb") as f:
+if yesno("Do you want to commit all changes?", "n"):
+    for roll_no, face in registered_faces.items():
+        cv2.imwrite(f"images\\{roll_no}.jpg", face)
+    with open("representations.pkl", "wb") as f:
         pickle.dump(representations, f)
+    connection.commit()
 
-connection.commit()
 cursor.close()
 connection.close()
